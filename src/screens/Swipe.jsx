@@ -294,13 +294,13 @@ export default function Swipe() {
   };
 
   if (feedLoading) {
-    return (
-      <div className="swipe-screen">
-        <div style={{ padding: 24 }}>Loading swipe feed...</div>
-        <BottomNav />
-      </div>
-    );
-  }
+  return (
+    <div className="swipe-screen swipe-loading">
+      <div className="swipe-loading-text">Loading swipe feed...</div>
+      <BottomNav />
+    </div>
+  );
+}
 
   if (feedError) {
     return (
@@ -404,7 +404,9 @@ export default function Swipe() {
           <div className="swipe-info-text">{item.description}</div>
 
           <div className="swipe-info-label swipe-info-label--big">Condition:</div>
-          <div className="swipe-info-text">{item.condition}</div>
+          <div className="swipe-info-description">
+            <div className="swipe-info-text">{item.description}</div>
+          </div>
         </div>
 
         <div className="swipe-info-right">
