@@ -147,15 +147,16 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 /* empty / loading message */
 .closet-empty{
   width: 100%;
   text-align: center;
-  margin-top: 24px;
   font-size: 13px;
-  color: rgba(80, 55, 105, 0.75);
+  font-weight: 600;
+  color: rgba(80, 55, 105, 0.85);
 }
 
 /* modal overlay */
@@ -211,7 +212,7 @@
 
 .closet-modal-label{
   font-size: 11px;
-  color: rgba(120, 140, 150, 0.85);
+  color: rgba(80, 55, 105, 0.85);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -223,6 +224,11 @@
   border: 2px solid rgba(120, 160, 165, 0.45);
   outline: none;
   font-size: 13px;
+  color: rgba(80, 55, 105, 0.85);
+}
+
+.closet-modal-input::placeholder {
+  color: rgba(80, 55, 105, 0.55);
 }
 
 .closet-modal-error{
