@@ -169,6 +169,13 @@
   line-height: 1.25;
 }
 
+.swipe-info-description {
+  max-height: 44px;          /* controls visible height */
+  overflow-y: auto;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
 .swipe-info-right{
   width: 96px;
   height: 100%;
@@ -215,3 +222,15 @@
   -webkit-user-drag: none;
 }
 
+.swipe-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swipe-loading-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(80, 55, 105, 0.85);
+  text-align: center;
+}
