@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Closet.css";
 
+import BottomNav from "../components/BottomNav";
 import editIcon from "../assets/closet/edit.png";
 import tagIcon from "../assets/closet/tag.png";
 import profileIcon from "../assets/closet/profile.png";
@@ -330,36 +331,8 @@ export default function Closet() {
       )}
 
       {/* bottom nav */}
-      <nav className="closet-nav" aria-label="Bottom navigation">
-        <button
-          className="closet-nav-btn"
-          type="button"
-          aria-label="Closet"
-          onClick={() => alert("You are already in Closet")}
-        >
-          <img className="closet-nav-ico" src={hangerIcon} alt="" />
-        </button>
+      <BottomNav />
 
-        <button
-          className="closet-nav-btn"
-          type="button"
-          aria-label="Swipe"
-          onClick={() => {
-            navigate("/swipe");
-          }}
-        >
-          <img className="closet-nav-ico closet-nav-heart" src={heartIcon} alt="" />
-        </button>
-
-        <button
-          className="closet-nav-btn"
-          type="button"
-          aria-label="Messages"
-          onClick={() => alert("Messages (coming soon)")}
-        >
-          <img className="closet-nav-ico" src={messageIcon} alt="" />
-        </button>
-      </nav>
     </div>
   );
 }

@@ -1,5 +1,9 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Swipe.css";
+import { getSwipeOwners, likeUserProfile, isMutualLike } from "../firebase/users";
+
+import BottomNav from "../components/BottomNav";
+import { useUserSession } from "../auth/UserSession";
 
 import logo from "../assets/logo.png";
 import defaultProfile from "../assets/default-profile.png";
@@ -7,10 +11,9 @@ import undoIcon from "../assets/undo.png";
 import rejectIcon from "../assets/reject.png";
 import likeIcon from "../assets/like.png";
 import superlikeIcon from "../assets/superlike.png";
-import clothingItem from "../assets/denimJacket.png";
 import jacketIcon from "../assets/jacket-icon.png";
-import { useNavigate } from "react-router-dom";
 
+import { useNavigate } from "react-router-dom";
 
 function load(key, fallback) {
   try {
@@ -25,54 +28,26 @@ function save(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+// Persist matched profiles so they don't come back after closing Match page
+const MATCHED_KEY = "cc_matched_owner_ids";
+
+function loadMatchedIds() {
+  return load(MATCHED_KEY, []);
+}
+
+function saveMatchedIds(ids) {
+  save(MATCHED_KEY, ids);
+}
+
 export default function Swipe() {
   const navigate = useNavigate();
 
-  const owners = useMemo(() => [
-    {
-      ownerId: "violet",
-      ownerName: "Violet",
-      ownerSchool: "Columbia SEAS",
-      closet: [
-        {
-          itemId: "violet-1",
-          image: clothingItem,
-          description: "Vintage Vivienne Westwood Denim Jacket",
-          condition: "Vintage, Good Condition",
-          price: 100,
-        },
-        {
-          itemId: "violet-2",
-          image: clothingItem,
-          description: "Item 2",
-          condition: "Like New",
-          price: 85,
-        },
-      ],
-    },
-    {
-      ownerId: "person2",
-      ownerName: "Person 2",
-      ownerSchool: "Columbia College",
-      closet: [
-        {
-          itemId: "person2-1",
-          image: clothingItem,
-          description: "item 1",
-          condition: "Good",
-          price: 25,
-        },
-        {
-          itemId: "person2-2",
-          image: clothingItem,
-          description: "item 2",
-          condition: "Good",
-          price: 50,
-        },
-      ],
-    },
-  ], []);
+  const { user } = useUserSession();
+  const currentUserId = user?.userId;
 
+  const [owners, setOwners] = useState([]);
+  const [feedLoading, setFeedLoading] = useState(true);
+  const [feedError, setFeedError] = useState("");
 
   const [ownerIndex, setOwnerIndex] = useState(0);
   const [itemIndex, setItemIndex] = useState(0);
@@ -80,7 +55,42 @@ export default function Swipe() {
   const [likes, setLikes] = useState(() => load("cc_likes", []));
   const [rejects, setRejects] = useState(() => load("cc_rejects", []));
 
+  const [matchedOwnerIds, setMatchedOwnerIds] = useState(() => loadMatchedIds());
+
   const [lastAction, setLastAction] = useState(null);
+
+  // Load swipe feed from Firestore (excluding current user + already matched users)
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadFeed() {
+      setFeedLoading(true);
+      setFeedError("");
+
+      try {
+        const data = await getSwipeOwners(currentUserId);
+        if (!mounted) return;
+
+        const filtered = data.filter((o) => !matchedOwnerIds.includes(o.ownerId));
+
+        setOwners(filtered);
+        setOwnerIndex(0);
+        setItemIndex(0);
+      } catch (e) {
+        if (!mounted) return;
+        setFeedError(e?.message || "Failed to load swipe feed.");
+        setOwners([]);
+      } finally {
+        if (!mounted) return;
+        setFeedLoading(false);
+      }
+    }
+
+    loadFeed();
+    return () => {
+      mounted = false;
+    };
+  }, [currentUserId, matchedOwnerIds]);
 
   const owner = owners[ownerIndex];
   const item = owner?.closet?.[itemIndex];
@@ -91,7 +101,10 @@ export default function Swipe() {
   };
 
   const nextOwner = () => {
-    setOwnerIndex((o) => Math.min(o + 1, owners.length - 1));
+    setOwnerIndex((o) => {
+      if (owners.length === 0) return 0;
+      return (o + 1) % owners.length;
+    });
     setItemIndex(0);
   };
 
@@ -118,8 +131,54 @@ export default function Swipe() {
     nextOwner();
   };
 
-  const onLike = () => {
+  function removeOwnerFromFeedById(ownerIdToRemove) {
+    setOwners((prev) => {
+      const updated = prev.filter((o) => o.ownerId !== ownerIdToRemove);
+
+      setOwnerIndex((currIdx) => {
+        if (updated.length === 0) return 0;
+        const removedIndex = prev.findIndex((o) => o.ownerId === ownerIdToRemove);
+        const nextIdx = removedIndex >= 0 && removedIndex < currIdx ? currIdx - 1 : currIdx;
+        return Math.min(nextIdx, updated.length - 1);
+      });
+
+      setItemIndex(0);
+      return updated;
+    });
+  }
+
+  const onLike = async () => {
     if (!owner || !item) return;
+
+    try {
+      await likeUserProfile(currentUserId, owner.ownerId, item.image);
+
+      const mutual = await isMutualLike(currentUserId, owner.ownerId);
+
+      if (mutual) {
+        // Persist that we've matched, so they don't return after closing the match page
+        setMatchedOwnerIds((prev) => {
+          const updated = prev.includes(owner.ownerId) ? prev : [...prev, owner.ownerId];
+          saveMatchedIds(updated);
+          return updated;
+        });
+
+        // Remove from current in-memory feed immediately
+        removeOwnerFromFeedById(owner.ownerId);
+
+        navigate("/match", {
+          state: {
+            matchedName: owner.ownerName,
+            matchPhoto: item.image,
+          },
+          replace: true,
+        });
+        return;
+      }
+    } catch (e) {
+      console.error(e);
+      // still proceed with demo behavior even if Firestore fails
+    }
 
     const payload = {
       ownerId: owner.ownerId,
@@ -161,7 +220,6 @@ export default function Swipe() {
   const startX = useRef(0);
   const startY = useRef(0);
   const dragging = useRef(false);
-
   const didSwipe = useRef(false);
 
   const SWIPE_THRESHOLD = 80;
@@ -235,42 +293,53 @@ export default function Swipe() {
     else resetCard();
   };
 
-  if (!item || !owner) {
+  if (feedLoading) {
     return (
       <div className="swipe-screen">
-        <div className="swipe-header">
-          <img src={logo} alt="Campus Closet" className="swipe-logo" />
-          <button
-            className="swipe-profile-btn"
-            onClick={() => navigate("/closet")}
-          >
-            <img src={defaultProfile} alt="Profile" />
-          </button>
-        </div>
-
-        <div style={{ padding: 24 }}>
-          You’re out of items 🎉
-          <div style={{ marginTop: 10, fontSize: 12, opacity: 0.7 }}>
-            Likes: {likes.length} • Rejects: {rejects.length}
-          </div>
-        </div>
+        <div style={{ padding: 24 }}>Loading swipe feed...</div>
+        <BottomNav />
       </div>
     );
   }
 
+  if (feedError) {
+    return (
+      <div className="swipe-screen">
+        <div style={{ padding: 24, color: "crimson" }}>{feedError}</div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (!owner || !item) {
+    return (
+      <div className="swipe-screen">
+        <div className="swipe-header">
+          <img src={logo} alt="Campus Closet" className="swipe-logo" />
+          <button className="swipe-profile-btn" onClick={() => navigate("/closet")}>
+            <img src={defaultProfile} alt="Profile" />
+          </button>
+        </div>
+
+        <div style={{ padding: 24 }}>You’re out of items 🎉</div>
+
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="swipe-screen">
       <div className="swipe-header">
         <img src={logo} alt="Campus Closet" className="swipe-logo" />
 
-      <button
-        className="swipe-profile-btn"
-        aria-label="Profile"
-        onClick={() => navigate("/closet")}
-      >
-        <img src={defaultProfile} alt="Profile" className="swipe-profile-img" />
-      </button>
+        <button
+          className="swipe-profile-btn"
+          aria-label="Profile"
+          onClick={() => navigate("/closet")}
+        >
+          <img src={defaultProfile} alt="Profile" className="swipe-profile-img" />
+        </button>
       </div>
 
       <div
@@ -345,6 +414,8 @@ export default function Swipe() {
           <div className="swipe-info-price">${item.price}</div>
         </div>
       </div>
+
+      <BottomNav />
     </div>
   );
 }

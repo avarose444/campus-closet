@@ -4,6 +4,14 @@
   background: #ffffff;
   display: flex;
   flex-direction: column;
+
+  position: relative;   /* IMPORTANT for BottomNav absolute positioning */
+  overflow: hidden;
+ /* padding-bottom: 60px; /* space so content isn't hidden behind the nav */
+}
+
+.swipe-card-container {
+  height: 76%;
 }
 
 .swipe-header {
@@ -206,3 +214,4 @@
 .swipe-card-image {
   -webkit-user-drag: none;
 }
+

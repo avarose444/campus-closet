@@ -1,11 +1,15 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./Match.css";
 
-import heartIcon from "../assets/closet/heart.png"; 
-import matchPhoto from "../assets/match/item.png";  
+import heartIcon from "../assets/closet/heart.png";
+import fallbackPhoto from "../assets/match/item.png";
 
 export default function Match() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const matchedName = location.state?.matchedName || "someone";
+  const matchPhoto = location.state?.matchPhoto || fallbackPhoto;
 
   return (
     <div className="match-screen">
@@ -29,7 +33,7 @@ export default function Match() {
           <img className="match-heart" src={heartIcon} alt="" aria-hidden />
         </div>
 
-        <div className="match-main-title">You matched with Ursula!</div>
+        <div className="match-main-title">You matched with {matchedName}!</div>
 
         <div className="match-subtitle">
           Now you will coordinate the details of your trade!
