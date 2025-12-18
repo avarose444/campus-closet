@@ -21,3 +21,16 @@ Node.js / npm: Project likely uses npm (package.json, package-lock.json) for dep
 Firebase: backend for user authorization and data storage.
 
 HTML/CSS/JavaScript: Standard web languages used.
+
+# To initially build app structure
+We ran a set of terminal commands that Ava used during an internship:
+
+npm create vite@latest 
+
+npm install
+
+npm run dev
+
+npm install firebase react-router-dom
+
+npm install react-icons
