@@ -405,7 +405,7 @@ export default function Swipe() {
 
           <div className="swipe-info-label swipe-info-label--big">Condition:</div>
           <div className="swipe-info-description">
-            <div className="swipe-info-text">{item.description}</div>
+            <div className="swipe-info-text">{item.condition}</div>
           </div>
         </div>
 

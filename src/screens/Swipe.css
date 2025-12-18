@@ -5,9 +5,9 @@
   display: flex;
   flex-direction: column;
 
-  position: relative;   /* IMPORTANT for BottomNav absolute positioning */
+  position: relative;  
   overflow: hidden;
- /* padding-bottom: 60px; /* space so content isn't hidden behind the nav */
+  padding-bottom: 50px; 
 }
 
 .swipe-card-container {
@@ -140,7 +140,7 @@
   justify-content: space-between;
   gap: 14px;
 
-  padding: 18px 18px 16px;
+  padding: 18px 18px 4px;
   box-sizing: border-box;
 }
 
@@ -170,7 +170,7 @@
 }
 
 .swipe-info-description {
-  max-height: 44px;          /* controls visible height */
+  max-height: 40px;          
   overflow-y: auto;
   padding-right: 4px;
   -webkit-overflow-scrolling: touch;
@@ -182,7 +182,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .swipe-info-iconbox{
