@@ -1,7 +1,11 @@
 # TO RUN
 To run Campus Closet:
-First, npm install //
-Then, npm start //
+
+First, npm install 
+
+Then, npm start 
+
+
 Finally, navigate to the local site, and sign into the login page with emilysher
 
 
