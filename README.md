@@ -1,3 +1,11 @@
+# TO RUN
+To run Campus Closet:
+First, npm install
+Then, npm start
+Finally, navigate to the local site
+
+
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
