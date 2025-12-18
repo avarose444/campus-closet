@@ -3,7 +3,7 @@ To run Campus Closet:
 
 First (in campus-closet directory), run _npm install_ 
 
-Then, run _npm start _
+Then, run _npm start_
 
 
 Finally, navigate to the local site, and sign into the login page with emilysher
@@ -34,3 +34,9 @@ npm run dev
 npm install firebase react-router-dom
 
 npm install react-icons
+
+# Acknowledgments 
+
+Small portions of the debugging and implementation guidance for this project were assisted by ChatGPT (OpenAI). 
+Specifically, ChatGPT was used for help with debugging React components, CSS scrolling behavior, and JS and HTML elements of the screens we implemented for demonstration purposes (add item and login). 
+
